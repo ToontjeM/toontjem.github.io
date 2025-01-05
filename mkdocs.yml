@@ -1,0 +1,25 @@
+site_name: My documentation website
+theme: 
+  name: material
+  features:
+    - search
+    - search.highlight
+    - search.suggest
+markdown_extensions:
+  - nl2br
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+plugins:
+  - callouts
+  - search
+  - social
+  - tags
+
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/toontjem
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/tonmachielsen
