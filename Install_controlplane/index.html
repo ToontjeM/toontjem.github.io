@@ -340,6 +340,66 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#clone-the-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Clone the repo.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-your-kind-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create your kind cluster
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-your-edb-20-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get your EDB 2.0 token.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-the-namespace-and-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create the namespace and secrets.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-the-bootstrap-using-helm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Run the bootstrap using helm.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-the-portal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use the portal.
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -594,9 +654,10 @@ POD=$(kubectl get pods -n edbpgai-bootstrap -o custom-columns=&quot;:metadata.na
 kubectl logs -n edbpgai-bootstrap $POD -f
 </code></pre></div></p>
 </div>
+<h3 id="clone-the-repo">Clone the repo.</h3>
 <p><code>git clone https://github.com/EnterpriseDB/edbpgai-boot</code></p>
 <p><code>cd edbpgai-boot</code></p>
-<p><code>export EDBToken=(`cat $HOME/.edbtoken`)</code></p>
+<h3 id="create-your-kind-cluster">Create your kind cluster</h3>
 <p><code>make create-kind</code></p>
 <div class="highlight"><pre><span></span><code>bash /Users/ton.machielsen/edbpgai-bootstrap/scripts/create-kind.sh /Users/ton.machielsen/edbpgai-bootstrap/bin/kind-v0.24.0 /Users/ton.machielsen/edbpgai-bootstrap/kind-config.yaml
 Creating cluster &quot;edbpgai&quot; ...
@@ -614,8 +675,11 @@ kubectl cluster-info --context kind-edbpgai
 
 Have a nice day! 👋
 </code></pre></div>
+<h3 id="get-your-edb-20-token">Get your EDB 2.0 token.</h3>
+<p><code>export EDBToken=(`cat $HOME/.edbtoken`)</code></p>
+<h3 id="create-the-namespace-and-secrets">Create the namespace and secrets.</h3>
 <p><code>echo $EDBTOKEN | ./scripts/install-static-pull-secret.sh</code></p>
-<p><div class="highlight"><pre><span></span><code>Enter the password for staging_beaconator@docker.enterprisedb.com
+<div class="highlight"><pre><span></span><code>Enter the password for staging_beaconator@docker.enterprisedb.com
 Creating secret edb-cred
 namespace/upm-replicator created
 secret/edb-cred created
@@ -623,18 +687,18 @@ namespace/edbpgai-bootstrap created
 secret/edb-cred created
 secret/edb-cred annotated
 Installation completed
-</code></pre></div><br />
-Run the bootstrap using helm.<br />
+</code></pre></div>
+<h3 id="run-the-bootstrap-using-helm">Run the bootstrap using helm.</h3>
 <div class="highlight"><pre><span></span><code>helm upgrade -n edbpgai-bootstrap \
   --install -f deploy/charts/edbpgai-bootstrap/values-kind.yaml \
   --set bootstrapImage=docker.enterprisedb.com/staging_pgai-platform/edbpgai-bootstrap/bootstrap-kind:v1.0.0-gm-appl \
   --set remoteContainerRegistryURL=docker.enterprisedb.com/staging_pgai-platform \
   --set internalContainerRegistryURL=docker.enterprisedb.com/staging_pgai-platform \
   bootstrap deploy/charts/edbpgai-bootstrap
-</code></pre></div></p>
+</code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This will take appx 15 minutes to complete. You can follow the progess using <code>kubectl logs -n edbpgai-bootstrap edbpgai-bootstrap-job-v1.0.0-&lt;tab&gt; -f</code></p>
+<p>This will take 15-20 minutes to complete depending on your machine specs. You can follow the progess using <code>kubectl logs -n edbpgai-bootstrap edbpgai-bootstrap-job-v1.0.0-&lt;tab&gt; -f</code></p>
 </div>
 <div class="highlight"><pre><span></span><code>...
 
@@ -648,32 +712,32 @@ Run the bootstrap using helm.<br />
 12:32:27PM: ---- waiting on 30 changes [0/39 done] ----
 -main- +2 -2 (base) √ ~/edbpgai-bootstrap
 </code></pre></div>
-<p>The UI is now available at http://localhost:8000</p>
+<h3 id="use-the-portal">Use the portal.</h3>
+<p>The UI is now available at <a href="http://localhost:8000">http://localhost:8000</a></p>
 <p>Currently the UI can only be accessed from the host where it is installed or using X-forwarding (which is terribly slow).</p>
 <p>Login using <code>owner@mycompany.com</code> with password <code>password</code> and create a cluster.</p>
 <p>Once a cluster is created you will see the following:<br />
-<img alt="image" src="https://github.com/user-attachments/assets/f9538215-0ab6-42d5-9a73-6aef32f59143" /></p>
+<img alt="image" src="../images/392044459-f9538215-0ab6-42d5-9a73-6aef32f59143.png" /></p>
 <p>Click on the cluster and in overview you will see something like this:<br />
-<img alt="image" src="https://github.com/user-attachments/assets/1841fdd8-2543-4203-ba07-bf6ee9329bc2" /></p>
+<img alt="image" src="../images/392045233-1841fdd8-2543-4203-ba07-bf6ee9329bc2.png" /></p>
 <p>Since the pgai.com domain doesn't exist and the port 30495 isn't accessible, do the following:<br />
 - Check out what is the name of the cluster using <code>kubectl get clusters -A</code>. The cluster you are looking for tis the one that starts with the <code>p-</code>.<br />
- ```<br />
-NAMESPACE                NAME                       AGE   INSTANCES   READY   STATUS                     PRIMARY<br />
-edb-migration-portal     cluster-migration-portal   53m   1           1       Cluster in healthy state   cluster-migration-portal-1<br />
-*** p-bvhzn7zaie ***     p-bvhzn7zaie               30m   1           1       Cluster in healthy state   p-bvhzn7zaie-1<br />
-transporter-ui-service   transporter-db             40m   1           1       Cluster in healthy state   transporter-db-1<br />
-upm-beaco-ff-base        app-db                     46m   1           1       Cluster in healthy state   app-db-1<br />
-upm-beacon               beacondb                   46m   1           1       Cluster in healthy state   beacondb-1<br />
-<div class="highlight"><pre><span></span><code>- Forward port 5432 in that cluster to 5433 on your local machine using `kubectl port-forward -n p-bvhzn7zaie services/p-bvhzn7zaie-rw-external 5433:5432 --address 0.0.0.0`
-
-Now that port 5433 is forwarded to your PC you can run `psql -h localhost -p 5433 -U edb_admin postgres`.
+<div class="highlight"><pre><span></span><code><span class="n">NAMESPACE</span>                <span class="n">NAME</span>                       <span class="n">AGE</span>   <span class="n">INSTANCES</span>   <span class="n">READY</span>   <span class="n">STATUS</span>                     <span class="n">PRIMARY</span>
+<span class="n">edb</span><span class="o">-</span><span class="n">migration</span><span class="o">-</span><span class="n">portal</span>     <span class="n">cluster</span><span class="o">-</span><span class="n">migration</span><span class="o">-</span><span class="n">portal</span>   <span class="mi">53</span><span class="n">m</span>   <span class="mi">1</span>           <span class="mi">1</span>       <span class="n">Cluster</span> <span class="ow">in</span> <span class="n">healthy</span> <span class="n">state</span>   <span class="n">cluster</span><span class="o">-</span><span class="n">migration</span><span class="o">-</span><span class="n">portal</span><span class="o">-</span><span class="mi">1</span>
+<span class="hll"><span class="n">p</span><span class="o">-</span><span class="n">bvhzn7zaie</span>             <span class="n">p</span><span class="o">-</span><span class="n">bvhzn7zaie</span>               <span class="mi">30</span><span class="n">m</span>   <span class="mi">1</span>           <span class="mi">1</span>       <span class="n">Cluster</span> <span class="ow">in</span> <span class="n">healthy</span> <span class="n">state</span>   <span class="n">p</span><span class="o">-</span><span class="n">bvhzn7zaie</span><span class="o">-</span><span class="mi">1</span>
+</span><span class="n">transporter</span><span class="o">-</span><span class="n">ui</span><span class="o">-</span><span class="n">service</span>   <span class="n">transporter</span><span class="o">-</span><span class="n">db</span>             <span class="mi">40</span><span class="n">m</span>   <span class="mi">1</span>           <span class="mi">1</span>       <span class="n">Cluster</span> <span class="ow">in</span> <span class="n">healthy</span> <span class="n">state</span>   <span class="n">transporter</span><span class="o">-</span><span class="n">db</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">upm</span><span class="o">-</span><span class="n">beaco</span><span class="o">-</span><span class="n">ff</span><span class="o">-</span><span class="n">base</span>        <span class="n">app</span><span class="o">-</span><span class="n">db</span>                     <span class="mi">46</span><span class="n">m</span>   <span class="mi">1</span>           <span class="mi">1</span>       <span class="n">Cluster</span> <span class="ow">in</span> <span class="n">healthy</span> <span class="n">state</span>   <span class="n">app</span><span class="o">-</span><span class="n">db</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">upm</span><span class="o">-</span><span class="n">beacon</span>               <span class="n">beacondb</span>                   <span class="mi">46</span><span class="n">m</span>   <span class="mi">1</span>           <span class="mi">1</span>       <span class="n">Cluster</span> <span class="ow">in</span> <span class="n">healthy</span> <span class="n">state</span>   <span class="n">beacondb</span><span class="o">-</span><span class="mi">1</span>
 </code></pre></div><br />
-Password for user edb_admin: <br />
-psql (17.0 (Homebrew petere/postgresql), server 17.2 (Debian 17.2-1EDB.bookworm))<br />
-SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, compression: off, ALPN: postgresql)<br />
-Type "help" for help.</p>
-<p>postgres=#<br />
-```</p>
+- Forward port 5432 in that cluster to 5433 on your local machine using <code>kubectl port-forward -n p-bvhzn7zaie services/p-bvhzn7zaie-rw-external 5433:5432 --address 0.0.0.0</code></p>
+<p>Now that port 5433 is forwarded to your PC you can run <code>psql -h localhost -p 5433 -U edb_admin postgres</code>.<br />
+<div class="highlight"><pre><span></span><code>Password for user edb_admin: 
+psql (17.0 (Homebrew petere/postgresql), server 17.2 (Debian 17.2-1EDB.bookworm))
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, compression: off, ALPN: postgresql)
+Type &quot;help&quot; for help.
+
+postgres=#
+</code></pre></div></p>
 
 
 

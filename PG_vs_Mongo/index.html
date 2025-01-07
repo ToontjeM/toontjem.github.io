@@ -404,6 +404,24 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#create-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create tables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fill-up-tables-with-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fill up tables with data.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#query-database" class="md-nav__link">
     <span class="md-ellipsis">
       Query database
@@ -599,122 +617,124 @@
 <h1 id="postgresql-vs-mongodb">PostgreSQL vs. MongoDB</h1>
 <h2 id="postgres">Postgres</h2>
 <h3 id="set-up-database">Set up database</h3>
-<p><div class="highlight"><pre><span></span><code>postgres=# create database test;
-CREATE DATABASE
-postgres=# \c test
-You are now connected to database &quot;test&quot; as user &quot;postgres&quot;.
-</code></pre></div><br />
-<div class="highlight"><pre><span></span><code>test=# DROP TABLE IF EXISTS estados CASCADE;
-DROP TABLE IF EXISTS transaction;
+<div class="highlight"><pre><span></span><code><span class="n">postgres</span><span class="o">=#</span><span class="w"> </span><span class="k">create</span><span class="w"> </span><span class="k">database</span><span class="w"> </span><span class="n">test</span><span class="p">;</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">DATABASE</span>
+<span class="n">postgres</span><span class="o">=#</span><span class="w"> </span><span class="err">\</span><span class="n">c</span><span class="w"> </span><span class="n">test</span>
+<span class="n">You</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">now</span><span class="w"> </span><span class="n">connected</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">database</span><span class="w"> </span><span class="s s-Name">&quot;test&quot;</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="s s-Name">&quot;postgres&quot;</span><span class="mf">.</span>
+</code></pre></div>
+<h3 id="create-tables">Create tables</h3>
+<div class="highlight"><pre><span></span><code><span class="n">test</span><span class="o">=#</span><span class="w"> </span><span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">estados</span><span class="w"> </span><span class="k">CASCADE</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="k">transaction</span><span class="p">;</span>
 
--- Create the first table, transaction
-CREATE TABLE transaction (
-    id SERIAL PRIMARY KEY,  
-    fecha DATE NOT NULL,
-    bicOrdenante BIGINT NOT NULL,
-    bicBeneficiario BIGINT NOT NULL,
-    referencia VARCHAR(255),
-    endToEndId VARCHAR(35),
-    instrId VARCHAR(35),
-    ibanOrdenante VARCHAR(34) NOT NULL,
-    ibanBeneficiario VARCHAR(34) NOT NULL
-);
+<span class="c1">-- Create the first table, transaction</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">transaction</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">SERIAL</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span><span class="w">  </span>
+<span class="w">    </span><span class="n">fecha</span><span class="w"> </span><span class="nb">DATE</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">bicOrdenante</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">bicBeneficiario</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">referencia</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mf">255</span><span class="p">),</span>
+<span class="w">    </span><span class="n">endToEndId</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mf">35</span><span class="p">),</span>
+<span class="w">    </span><span class="n">instrId</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mf">35</span><span class="p">),</span>
+<span class="w">    </span><span class="n">ibanOrdenante</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mf">34</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ibanBeneficiario</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mf">34</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
+<span class="p">);</span>
 
--- Create the second table, estados with a foreign key reference to transaction
-CREATE TABLE estados (
-    id SERIAL PRIMARY KEY, 
-    transaction_id INT NOT NULL,  
-    estado VARCHAR(255) NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
-    xml TEXT NOT NULL,
-    FOREIGN KEY (transaction_id) REFERENCES transaction(id) ON DELETE CASCADE  
-);
-</code></pre></div><br />
-<div class="highlight"><pre><span></span><code>my_database=# DO $$
-DECLARE
-    i INT;
-BEGIN
-    FOR i IN 1..10000 LOOP
-        INSERT INTO transaction (fecha, bicOrdenante, bicBeneficiario, referencia, endToEndId, instrId, ibanOrdenante, ibanBeneficiario)
-        VALUES (
-            CURRENT_DATE - (random() * 365)::int,  -- Random date within the last year
-            (8000000000 + (random() * 1000000000)::BIGINT),   -- Random BIC as BIGINT
-            (8000000000 + (random() * 1000000000)::BIGINT),   -- Random BIC as BIGINT
-            substr(md5(random()::text), 1, 255),   -- Random reference string (255 chars)
-            substr(md5(random()::text), 1, 35),    -- Random EndToEndId (35 chars)
-            substr(md5(random()::text), 1, 35),    -- Random InstrId (35 chars)
-            &#39;GB29NWBK60161331926819&#39; || i::text,   -- Fixed length IBAN
-            &#39;GB29NWBK60161331926819&#39; || (i + 100)::text -- Fixed length IBAN with offset
-        );
-    END LOOP;
-END $$;
+<span class="c1">-- Create the second table, estados with a foreign key reference to transaction</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">estados</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">SERIAL</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">transaction_id</span><span class="w"> </span><span class="nb">INT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span>
+<span class="w">    </span><span class="n">estado</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mf">255</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="nb">timestamp</span><span class="w"> </span><span class="nb">TIMESTAMP</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="nb">xml</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="k">FOREIGN</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">transaction_id</span><span class="p">)</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="k">transaction</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">DELETE</span><span class="w"> </span><span class="k">CASCADE</span><span class="w">  </span>
+<span class="p">);</span>
+</code></pre></div>
+<h3 id="fill-up-tables-with-data">Fill up tables with data.</h3>
+<div class="highlight"><pre><span></span><code><span class="n">my_database</span><span class="o">=#</span><span class="w"> </span><span class="k">DO</span><span class="w"> </span><span class="s">$$</span>
+<span class="k">DECLARE</span>
+<span class="w">    </span><span class="n">i</span><span class="w"> </span><span class="nb">INT</span><span class="p">;</span>
+<span class="k">BEGIN</span>
+<span class="w">    </span><span class="k">FOR</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="mf">1..10000</span><span class="w"> </span><span class="k">LOOP</span>
+<span class="w">        </span><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="k">transaction</span><span class="w"> </span><span class="p">(</span><span class="n">fecha</span><span class="p">,</span><span class="w"> </span><span class="n">bicOrdenante</span><span class="p">,</span><span class="w"> </span><span class="n">bicBeneficiario</span><span class="p">,</span><span class="w"> </span><span class="n">referencia</span><span class="p">,</span><span class="w"> </span><span class="n">endToEndId</span><span class="p">,</span><span class="w"> </span><span class="n">instrId</span><span class="p">,</span><span class="w"> </span><span class="n">ibanOrdenante</span><span class="p">,</span><span class="w"> </span><span class="n">ibanBeneficiario</span><span class="p">)</span>
+<span class="w">        </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span>
+<span class="w">            </span><span class="k">CURRENT_DATE</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">random</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">365</span><span class="p">)</span><span class="o">::</span><span class="nb">int</span><span class="p">,</span><span class="w">  </span><span class="c1">-- Random date within the last year</span>
+<span class="w">            </span><span class="p">(</span><span class="mf">8000000000</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">random</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1000000000</span><span class="p">)</span><span class="o">::</span><span class="nb">BIGINT</span><span class="p">),</span><span class="w">   </span><span class="c1">-- Random BIC as BIGINT</span>
+<span class="w">            </span><span class="p">(</span><span class="mf">8000000000</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">random</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1000000000</span><span class="p">)</span><span class="o">::</span><span class="nb">BIGINT</span><span class="p">),</span><span class="w">   </span><span class="c1">-- Random BIC as BIGINT</span>
+<span class="w">            </span><span class="n">substr</span><span class="p">(</span><span class="n">md5</span><span class="p">(</span><span class="n">random</span><span class="p">()</span><span class="o">::</span><span class="nb">text</span><span class="p">),</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="mf">255</span><span class="p">),</span><span class="w">   </span><span class="c1">-- Random reference string (255 chars)</span>
+<span class="w">            </span><span class="n">substr</span><span class="p">(</span><span class="n">md5</span><span class="p">(</span><span class="n">random</span><span class="p">()</span><span class="o">::</span><span class="nb">text</span><span class="p">),</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="mf">35</span><span class="p">),</span><span class="w">    </span><span class="c1">-- Random EndToEndId (35 chars)</span>
+<span class="w">            </span><span class="n">substr</span><span class="p">(</span><span class="n">md5</span><span class="p">(</span><span class="n">random</span><span class="p">()</span><span class="o">::</span><span class="nb">text</span><span class="p">),</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="mf">35</span><span class="p">),</span><span class="w">    </span><span class="c1">-- Random InstrId (35 chars)</span>
+<span class="w">            </span><span class="s1">&#39;GB29NWBK60161331926819&#39;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">i</span><span class="o">::</span><span class="nb">text</span><span class="p">,</span><span class="w">   </span><span class="c1">-- Fixed length IBAN</span>
+<span class="w">            </span><span class="s1">&#39;GB29NWBK60161331926819&#39;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">100</span><span class="p">)</span><span class="o">::</span><span class="nb">text</span><span class="w"> </span><span class="c1">-- Fixed length IBAN with offset</span>
+<span class="w">        </span><span class="p">);</span>
+<span class="w">    </span><span class="k">END</span><span class="w"> </span><span class="k">LOOP</span><span class="p">;</span>
+<span class="k">END</span><span class="w"> </span><span class="s">$$</span><span class="p">;</span>
 
-DO $$
-DECLARE
-    trans_id INT;
-    estado_count INT;
-    j INT;
-BEGIN
-    FOR trans_id IN 1..10000 LOOP
-        -- Generate a random number of estados (between 1 and 18)
-        estado_count := (random() * 18 + 1)::int;
+<span class="k">DO</span><span class="w"> </span><span class="s">$$</span>
+<span class="k">DECLARE</span>
+<span class="w">    </span><span class="n">trans_id</span><span class="w"> </span><span class="nb">INT</span><span class="p">;</span>
+<span class="w">    </span><span class="n">estado_count</span><span class="w"> </span><span class="nb">INT</span><span class="p">;</span>
+<span class="w">    </span><span class="n">j</span><span class="w"> </span><span class="nb">INT</span><span class="p">;</span>
+<span class="k">BEGIN</span>
+<span class="w">    </span><span class="k">FOR</span><span class="w"> </span><span class="n">trans_id</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="mf">1..10000</span><span class="w"> </span><span class="k">LOOP</span>
+<span class="w">        </span><span class="c1">-- Generate a random number of estados (between 1 and 18)</span>
+<span class="w">        </span><span class="n">estado_count</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">(</span><span class="n">random</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">18</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1</span><span class="p">)</span><span class="o">::</span><span class="nb">int</span><span class="p">;</span>
 
-        FOR j IN 1..estado_count LOOP
-            INSERT INTO estados (transaction_id, estado, timestamp, xml)
-            VALUES (
-                trans_id,
-                substr(md5(random()::text), 1, 255),
-                CURRENT_TIMESTAMP - (random() * 1000000)::int * INTERVAL &#39;1 second&#39;,
-                &#39;&lt;?xml version=&quot;1.0&quot;?&gt;&lt;data&gt;Random XML data for estado &#39; || j || &#39;&lt;/data&gt;&#39;
-            );
-        END LOOP;
-    END LOOP;
-END $$;
-</code></pre></div></p>
+<span class="w">        </span><span class="k">FOR</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="mf">1..</span><span class="n">estado_count</span><span class="w"> </span><span class="k">LOOP</span>
+<span class="w">            </span><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">estados</span><span class="w"> </span><span class="p">(</span><span class="n">transaction_id</span><span class="p">,</span><span class="w"> </span><span class="n">estado</span><span class="p">,</span><span class="w"> </span><span class="nb">timestamp</span><span class="p">,</span><span class="w"> </span><span class="nb">xml</span><span class="p">)</span>
+<span class="w">            </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span>
+<span class="w">                </span><span class="n">trans_id</span><span class="p">,</span>
+<span class="w">                </span><span class="n">substr</span><span class="p">(</span><span class="n">md5</span><span class="p">(</span><span class="n">random</span><span class="p">()</span><span class="o">::</span><span class="nb">text</span><span class="p">),</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="mf">255</span><span class="p">),</span>
+<span class="w">                </span><span class="k">CURRENT_TIMESTAMP</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">random</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1000000</span><span class="p">)</span><span class="o">::</span><span class="nb">int</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;1 second&#39;</span><span class="p">,</span>
+<span class="w">                </span><span class="s1">&#39;&lt;?xml version=&quot;1.0&quot;?&gt;&lt;data&gt;Random XML data for estado &#39;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="s1">&#39;&lt;/data&gt;&#39;</span>
+<span class="w">            </span><span class="p">);</span>
+<span class="w">        </span><span class="k">END</span><span class="w"> </span><span class="k">LOOP</span><span class="p">;</span>
+<span class="w">    </span><span class="k">END</span><span class="w"> </span><span class="k">LOOP</span><span class="p">;</span>
+<span class="k">END</span><span class="w"> </span><span class="s">$$</span><span class="p">;</span>
+</code></pre></div>
 <h3 id="query-database">Query database</h3>
-<div class="highlight"><pre><span></span><code>psql -d my_database -c &quot;\timing; SELECT * FROM transaction t LEFT JOIN estados e ON t.id = e.transaction_id;&quot; &gt; /dev/null
+<div class="highlight"><pre><span></span><code>psql<span class="w"> </span>-d<span class="w"> </span>my_database<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;\timing; SELECT * FROM transaction t LEFT JOIN estados e ON t.id = e.transaction_id;&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/dev/null
 </code></pre></div>
 <h2 id="mongodb">MongoDB</h2>
 <h3 id="set-up-database_1">Set up database</h3>
-<div class="highlight"><pre><span></span><code>use my_database;
-db.transactions.drop();
-for (let i = 1; i &lt;= 10000; i++) {
-    // Generate random number of estados (between 1 and 18)
-    const estadoCount = Math.floor(Math.random() * 18) + 1;
+<div class="highlight"><pre><span></span><code><span class="nx">use</span><span class="w"> </span><span class="nx">my_database</span><span class="p">;</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">transactions</span><span class="p">.</span><span class="nx">drop</span><span class="p">();</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">let</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mf">10000</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Generate random number of estados (between 1 and 18)</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">estadoCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">18</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1</span><span class="p">;</span>
 
-    // Initialize the estados array
-    const estados = [];
+<span class="w">    </span><span class="c1">// Initialize the estados array</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">estados</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[];</span>
 
-    for (let j = 0; j &lt; estadoCount; j++) {
-        estados.push({
-            estado: Math.random().toString(36).substring(2, 15), // Random estado string
-            timestamp: new Date(Date.now() - (Math.random() * 10000000)), // Random timestamp
-            xml: `&lt;data&gt;Random XML data for estado ${j + 1}&lt;/data&gt;` // Sample XML
-        });
-    }
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">let</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">estadoCount</span><span class="p">;</span><span class="w"> </span><span class="nx">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">estados</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+<span class="w">            </span><span class="nx">estado</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">().</span><span class="nx">toString</span><span class="p">(</span><span class="mf">36</span><span class="p">).</span><span class="nx">substring</span><span class="p">(</span><span class="mf">2</span><span class="p">,</span><span class="w"> </span><span class="mf">15</span><span class="p">),</span><span class="w"> </span><span class="c1">// Random estado string</span>
+<span class="w">            </span><span class="nx">timestamp</span><span class="o">:</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">10000000</span><span class="p">)),</span><span class="w"> </span><span class="c1">// Random timestamp</span>
+<span class="w">            </span><span class="nx">xml</span><span class="o">:</span><span class="w"> </span><span class="sb">`&lt;data&gt;Random XML data for estado </span><span class="si">${</span><span class="nx">j</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1</span><span class="si">}</span><span class="sb">&lt;/data&gt;`</span><span class="w"> </span><span class="c1">// Sample XML</span>
+<span class="w">        </span><span class="p">});</span>
+<span class="w">    </span><span class="p">}</span>
 
-    // Create a transaction document
-    const transaction = {
-        fecha: new Date(Date.now() - (Math.random() * 31536000000)), // Random date within the last year
-        bicOrdenante: Math.floor(8000000000 + Math.random() * 1000000000), // Random BIC as BIGINT
-        bicBeneficiario: Math.floor(8000000000 + Math.random() * 1000000000), // Random BIC as BIGINT
-        referencia: Math.random().toString(36).substring(2, 15), // Random reference string
-        endToEndId: Math.random().toString(36).substring(2, 15), // Random EndToEndId
-        instrId: Math.random().toString(36).substring(2, 15), // Random InstrId
-        ibanOrdenante: `GB29NWBK60161331926819${i}`, // Fixed length IBAN
-        ibanBeneficiario: `GB29NWBK60161331926819${i + 100}`, // Fixed length IBAN with offset
-        estados: estados // Embedded estados array
-    };
+<span class="w">    </span><span class="c1">// Create a transaction document</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">transaction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">fecha</span><span class="o">:</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">31536000000</span><span class="p">)),</span><span class="w"> </span><span class="c1">// Random date within the last year</span>
+<span class="w">        </span><span class="nx">bicOrdenante</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="mf">8000000000</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1000000000</span><span class="p">),</span><span class="w"> </span><span class="c1">// Random BIC as BIGINT</span>
+<span class="w">        </span><span class="nx">bicBeneficiario</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="mf">8000000000</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1000000000</span><span class="p">),</span><span class="w"> </span><span class="c1">// Random BIC as BIGINT</span>
+<span class="w">        </span><span class="nx">referencia</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">().</span><span class="nx">toString</span><span class="p">(</span><span class="mf">36</span><span class="p">).</span><span class="nx">substring</span><span class="p">(</span><span class="mf">2</span><span class="p">,</span><span class="w"> </span><span class="mf">15</span><span class="p">),</span><span class="w"> </span><span class="c1">// Random reference string</span>
+<span class="w">        </span><span class="nx">endToEndId</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">().</span><span class="nx">toString</span><span class="p">(</span><span class="mf">36</span><span class="p">).</span><span class="nx">substring</span><span class="p">(</span><span class="mf">2</span><span class="p">,</span><span class="w"> </span><span class="mf">15</span><span class="p">),</span><span class="w"> </span><span class="c1">// Random EndToEndId</span>
+<span class="w">        </span><span class="nx">instrId</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">().</span><span class="nx">toString</span><span class="p">(</span><span class="mf">36</span><span class="p">).</span><span class="nx">substring</span><span class="p">(</span><span class="mf">2</span><span class="p">,</span><span class="w"> </span><span class="mf">15</span><span class="p">),</span><span class="w"> </span><span class="c1">// Random InstrId</span>
+<span class="w">        </span><span class="nx">ibanOrdenante</span><span class="o">:</span><span class="w"> </span><span class="sb">`GB29NWBK60161331926819</span><span class="si">${</span><span class="nx">i</span><span class="si">}</span><span class="sb">`</span><span class="p">,</span><span class="w"> </span><span class="c1">// Fixed length IBAN</span>
+<span class="w">        </span><span class="nx">ibanBeneficiario</span><span class="o">:</span><span class="w"> </span><span class="sb">`GB29NWBK60161331926819</span><span class="si">${</span><span class="nx">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">100</span><span class="si">}</span><span class="sb">`</span><span class="p">,</span><span class="w"> </span><span class="c1">// Fixed length IBAN with offset</span>
+<span class="w">        </span><span class="nx">estados</span><span class="o">:</span><span class="w"> </span><span class="nx">estados</span><span class="w"> </span><span class="c1">// Embedded estados array</span>
+<span class="w">    </span><span class="p">};</span>
 
-    // Insert the transaction record into the collection
-    db.transactions.insert(transaction);
-}
+<span class="w">    </span><span class="c1">// Insert the transaction record into the collection</span>
+<span class="w">    </span><span class="nx">db</span><span class="p">.</span><span class="nx">transactions</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">transaction</span><span class="p">);</span>
+<span class="p">}</span>
 </code></pre></div>
 <h3 id="query-database_1">Query database</h3>
-<div class="highlight"><pre><span></span><code>let start = new Date();
-db.transactions.find({}).limit(0).toArray();  // This doesn’t retrieve any records but allows measuring
-let end = new Date();
-print(`Query time: ${end - start} ms`);  // Show query time
+<div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">();</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">transactions</span><span class="p">.</span><span class="nx">find</span><span class="p">({}).</span><span class="nx">limit</span><span class="p">(</span><span class="mf">0</span><span class="p">).</span><span class="nx">toArray</span><span class="p">();</span><span class="w">  </span><span class="c1">// This doesn’t retrieve any records but allows measuring</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">();</span>
+<span class="nx">print</span><span class="p">(</span><span class="sb">`Query time: </span><span class="si">${</span><span class="nx">end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">start</span><span class="si">}</span><span class="sb"> ms`</span><span class="p">);</span><span class="w">  </span><span class="c1">// Show query time</span>
 </code></pre></div>
 
 

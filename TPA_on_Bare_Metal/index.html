@@ -554,15 +554,15 @@
 <li>Reboot</li>
 <li>Copy your SSH key to the targets using <code>ssh-copy-id -i ~/.ssh/id_rsa ton@&lt;target&gt;</code></li>
 <li>In your config, make sure the correct key and ansible user are defined.<br />
-<div class="highlight"><pre><span></span><code>keyring_backend: system
-vault_name: b42cba99-6453-4842-907b-4822b61230ea
-ssh_key_file: ~/.ssh/id_rsa
-...
-instance_defaults:
-  platform: bare
-  vars:
-    manage_ssh_hostkeys: no
-    ansible_user: ton
+<div class="highlight"><pre><span></span><code><span class="nt">keyring_backend</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system</span>
+<span class="nt">vault_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">b42cba99-6453-4842-907b-4822b61230ea</span>
+<span class="nt">ssh_key_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">~/.ssh/id_rsa</span>
+<span class="nn">...</span>
+<span class="nt">instance_defaults</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">platform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bare</span>
+<span class="w">  </span><span class="nt">vars</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">manage_ssh_hostkeys</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">no</span>
+<span class="w">    </span><span class="nt">ansible_user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ton</span>
 </code></pre></div></li>
 <li>Make sure you create your EDB Repo 2.0 token using <code>export EDB_SUBSCRIPTION_TOKEN=&lt;your token&gt;</code> and check if the variable exists using <code>env</code>.</li>
 <li>Run <code>tpaexec provision .</code></li>

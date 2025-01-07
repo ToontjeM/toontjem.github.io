@@ -802,224 +802,172 @@
 <h2 id="prepare-machine">Prepare machine</h2>
 <h3 id="prepare-os">Prepare OS</h3>
 <h4 id="disable-selinux">Disable selinux</h4>
-<ul>
-<li>In <code>/etc/selinux/config</code> set <code>SELINUX=disabled</code></li>
-</ul>
+<p>In <code>/etc/selinux/config</code> set <code>SELINUX=disabled</code></p>
 <h4 id="set-limits">Set limits</h4>
-<ul>
-<li>
 <p>In <code>/etc/sysctl.conf</code> set:<br />
-<div class="highlight"><pre><span></span><code>vm.overcommit_memory = 2
-vm.overcommit_ratio = 95 
-net.ipv4.ip_local_port_range = 10000 65535 
-kernel.sem = 250 2048000 200 8192
+<div class="highlight"><pre><span></span><code>vm.overcommit_memory<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2</span>
+vm.overcommit_ratio<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">95</span><span class="w"> </span>
+net.ipv4.ip_local_port_range<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">10000</span><span class="w"> </span><span class="m">65535</span><span class="w"> </span>
+kernel.sem<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">250</span><span class="w"> </span><span class="m">2048000</span><span class="w"> </span><span class="m">200</span><span class="w"> </span><span class="m">8192</span>
 </code></pre></div><br />
 Enable this with <code>sudo sysctl --system</code></p>
-</li>
-<li>
 <p>In <code>/etc/security/limits.conf</code> set: <br />
-<div class="highlight"><pre><span></span><code>soft nofile 524288
-hard nofile 524288
-soft nproc 131072
-hard nproc 131072
+<div class="highlight"><pre><span></span><code>soft<span class="w"> </span>nofile<span class="w"> </span><span class="m">524288</span>
+hard<span class="w"> </span>nofile<span class="w"> </span><span class="m">524288</span>
+soft<span class="w"> </span>nproc<span class="w"> </span><span class="m">131072</span>
+hard<span class="w"> </span>nproc<span class="w"> </span><span class="m">131072</span>
 </code></pre></div></p>
-</li>
-</ul>
 <h3 id="enable-passwordless-sudo">Enable passwordless sudo</h3>
-<ul>
-<li><code>sudo visudo</code><br />
-<div class="highlight"><pre><span></span><code>## Allows people in group wheel to run all commands
-#%wheel ALL=(ALL)       ALL
+<p><code>sudo visudo</code><br />
+<div class="highlight"><pre><span></span><code><span class="c1">## Allows people in group wheel to run all commands</span>
+<span class="c1">#%wheel ALL=(ALL)       ALL</span>
 
-## Same thing without a password
-%wheel ALL=(ALL)       NOPASSWD: ALL
-</code></pre></div></li>
-</ul>
+<span class="c1">## Same thing without a password</span>
+%wheel<span class="w"> </span><span class="nv">ALL</span><span class="o">=(</span>ALL<span class="o">)</span><span class="w">       </span>NOPASSWD:<span class="w"> </span>ALL
+</code></pre></div></p>
 <h3 id="create-user-gpadmin">Create user gpadmin</h3>
-<ul>
-<li>
 <p><code>sudo groupadd gpadmin</code></p>
-</li>
-<li>
 <p><code>sudo useradd gpadmin -r -m -g gpadmin</code></p>
-</li>
-<li>
 <p><code>sudo passwd gpadmin</code> and set the password.</p>
-</li>
-</ul>
 <h4 id="create-ssh-key">Create ssh key</h4>
-<ul>
-<li>
 <p><code>su - gpadmin</code></p>
-</li>
-<li>
 <p><code>ssh-keygen -t rsa -b 4096</code> and copy to host <code>ssh-copy-id -i .ssh/id_rsa gpadmin@&lt;hostname&gt;</code></p>
-</li>
-</ul>
 <p>Reboot to apply all above changes.</p>
 <h2 id="build-greenplum-from-source">Build greenplum from source</h2>
 <h3 id="install-dependencies">Install dependencies</h3>
-<ul>
-<li><code>sudo dnf groupinstall "Development Tools"</code></li>
-<li><code>sudo dnf install python-devel python-pip epel-release perl readline-devel krb5-devel apr-devel libevent-devel libxml2-devel curl-devel bzip2-devel xerces-c-devel</code></li>
-<li><code>pip install psutil psycopg2 psycopg2-binary</code></li>
-<li><code>git clone https://github.com/greenplum-db/gpdb-archive</code></li>
-</ul>
+<p><code>sudo dnf groupinstall "Development Tools"</code><br />
+<code>sudo dnf install python-devel python-pip epel-release perl readline-devel krb5-devel apr-devel libevent-devel libxml2-devel curl-devel bzip2-devel xerces-c-devel</code><br />
+<code>pip install psutil psycopg2 psycopg2-binary</code><br />
+<code>git clone https://github.com/greenplum-db/gpdb-archive</code></p>
 <h4 id="build-libyaml">Build libyaml</h4>
-<div class="highlight"><pre><span></span><code>wget https://github.com/yaml/libyaml/archive/refs/tags/0.2.5.tar.gz
-tar -xvzf 0.2.5.tar.gz
-cd libyaml-0.2.5
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/yaml/libyaml/archive/refs/tags/0.2.5.tar.gz
+tar<span class="w"> </span>-xvzf<span class="w"> </span><span class="m">0</span>.2.5.tar.gz
+<span class="nb">cd</span><span class="w"> </span>libyaml-0.2.5
 ./bootstrap
 ./configure
 make
-sudo make install
-export LDFLAGS=&quot;-L/usr/local/lib&quot;
-export CPPFLAGS=&quot;-I/usr/local/include&quot;
+sudo<span class="w"> </span>make<span class="w"> </span>install
+<span class="nb">export</span><span class="w"> </span><span class="nv">LDFLAGS</span><span class="o">=</span><span class="s2">&quot;-L/usr/local/lib&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CPPFLAGS</span><span class="o">=</span><span class="s2">&quot;-I/usr/local/include&quot;</span>
 </code></pre></div>
 <h3 id="build-greenplum">Build greenplum</h3>
-<ul>
-<li><code>cd gpdb-archive</code></li>
-<li><code>./configure --with-perl --with-python --with-libxml --with-gssapi --prefix=/usr/local/gpdb</code></li>
-<li><code>make -j8</code></li>
-<li><code>sudo make install</code></li>
-</ul>
+<p><code>cd gpdb-archive</code><br />
+<code>./configure --with-perl --with-python --with-libxml --with-gssapi --prefix=/usr/local/gpdb</code><br />
+<code>make -j8</code><br />
+<code>sudo make install</code></p>
 <h2 id="greenplum-post-installation">Greenplum post installation</h2>
 <h3 id="add-greenplum-path-to-bashrc-of-the-gpadmin-user">Add greenplum path to <code>.bashrc</code> of the <code>gpadmin</code> user.</h3>
-<ul>
-<li>As user gpadmin, <code>echo ". /usr/local/gpdb/greenplum_path.sh" &gt;&gt; .bashrc</code></li>
-</ul>
+<p>As user gpadmin, <code>echo ". /usr/local/gpdb/greenplum_path.sh" &gt;&gt; .bashrc</code></p>
 <h3 id="create-a-host-file-with-all-your-greenplum-nodes-in-it-for-me-this-is-just-one-node">Create a host file with all your greenplum nodes in it (for me this is just one node)</h3>
-<ul>
-<li>As user gpadmin, <code>echo "&lt;hostname&gt; &gt; hostfile</code></li>
-</ul>
+<p>As user gpadmin, <code>echo "&lt;hostname&gt; &gt; hostfile</code></p>
 <h3 id="create-data-directory">Create data directory</h3>
-<ul>
-<li>
 <p>As user gpadmin, <code>mkdir ./data</code></p>
-</li>
-<li>
 <p><code>vim .bashrc</code><br />
-<div class="highlight"><pre><span></span><code>export MASTER_DATA_DIRECTORY=/home/gpadmin/data/gpsne-1
-</code></pre></div></p>
-</li>
-<li><code>source .bashrc</code></li>
-</ul>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">MASTER_DATA_DIRECTORY</span><span class="o">=</span>/home/gpadmin/data/gpsne-1
+</code></pre></div><br />
+<code>source .bashrc</code></p>
 <h2 id="configure-greenplum-cluster">Configure greenplum cluster</h2>
 <h3 id="copy-sample-configuration-to-home">Copy sample configuration to $HOME</h3>
-<ul>
-<li>As gpadmin, <code>cp $GPHOME/docs/cli_help/gpconfigs/gpinitsystem_singlenode ~</code></li>
-</ul>
+<p>As gpadmin, <code>cp $GPHOME/docs/cli_help/gpconfigs/gpinitsystem_singlenode ~</code></p>
 <h3 id="modify-config-file">Modify config file</h3>
-<ul>
-<li><code>vim gpinitsystem_singlenode</code> and change:<br />
-<div class="highlight"><pre><span></span><code>MACHINE_LIST_FILE=./hostfile
-declare -a DATA_DIRECTORY=(/home/gpadmin/data /home/gpadmin/data /home/gpadmin/data) # I created 3 shards, create as many as you need.
-COORDINATOR_HOSTNAME=&lt;hostname&gt;
-COORDINATOR_DIRECTORY=/home/gpadmin/data
-</code></pre></div></li>
-</ul>
+<p><code>vim gpinitsystem_singlenode</code> and change:<br />
+<div class="highlight"><pre><span></span><code><span class="nv">MACHINE_LIST_FILE</span><span class="o">=</span>./hostfile
+<span class="nb">declare</span><span class="w"> </span>-a<span class="w"> </span><span class="nv">DATA_DIRECTORY</span><span class="o">=(</span>/home/gpadmin/data<span class="w"> </span>/home/gpadmin/data<span class="w"> </span>/home/gpadmin/data<span class="o">)</span><span class="w"> </span><span class="c1"># I created 3 shards, create as many as you need.</span>
+<span class="nv">COORDINATOR_HOSTNAME</span><span class="o">=</span>&lt;hostname&gt;
+<span class="nv">COORDINATOR_DIRECTORY</span><span class="o">=</span>/home/gpadmin/data
+</code></pre></div></p>
 <h2 id="create-cluster">Create cluster</h2>
-<ul>
-<li>As gpadmin, <code>gpinitsystem -c gpinitsystem_singlenode</code></li>
-</ul>
+<p>As gpadmin, <code>gpinitsystem -c gpinitsystem_singlenode</code></p>
 <p>Greenplum should now be running<br />
-<div class="highlight"><pre><span></span><code>gpadmin    10780       1  0 12:19 ?        00:00:00 /usr/local/gpdb/bin/postgres -D /home/gpadmin/data/gpsne0 -c gp_role=execute
-gpadmin    10781       1  0 12:19 ?        00:00:00 /usr/local/gpdb/bin/postgres -D /home/gpadmin/data/gpsne1 -c gp_role=execute
-gpadmin    10782       1  0 12:19 ?        00:00:00 /usr/local/gpdb/bin/postgres -D /home/gpadmin/data/gpsne2 -c gp_role=execute
-gpadmin    10783   10780  0 12:19 ?        00:00:00 postgres:  6000, logger process   
-gpadmin    10784   10781  0 12:19 ?        00:00:00 postgres:  6001, logger process   
-gpadmin    10785   10782  0 12:19 ?        00:00:00 postgres:  6002, logger process   
-gpadmin    10789   10780  0 12:19 ?        00:00:00 postgres:  6000, checkpointer   
-gpadmin    10790   10780  0 12:19 ?        00:00:00 postgres:  6000, background writer   
-gpadmin    10791   10780  0 12:19 ?        00:00:00 postgres:  6000, walwriter   
-gpadmin    10792   10780  0 12:19 ?        00:00:00 postgres:  6000, autovacuum launcher   
-gpadmin    10793   10780  0 12:19 ?        00:00:00 postgres:  6000, stats collector   
-gpadmin    10794   10780  0 12:19 ?        00:00:00 postgres:  6000, logical replication launcher   
-gpadmin    10795   10781  0 12:19 ?        00:00:00 postgres:  6001, checkpointer   
-gpadmin    10796   10781  0 12:19 ?        00:00:00 postgres:  6001, background writer   
-gpadmin    10797   10781  0 12:19 ?        00:00:00 postgres:  6001, walwriter   
-gpadmin    10798   10781  0 12:19 ?        00:00:00 postgres:  6001, autovacuum launcher   
-gpadmin    10799   10781  0 12:19 ?        00:00:00 postgres:  6001, stats collector   
-gpadmin    10800   10781  0 12:19 ?        00:00:00 postgres:  6001, logical replication launcher   
-gpadmin    10801   10782  0 12:19 ?        00:00:00 postgres:  6002, checkpointer   
-gpadmin    10802   10782  0 12:19 ?        00:00:00 postgres:  6002, background writer   
-gpadmin    10803   10782  0 12:19 ?        00:00:00 postgres:  6002, walwriter   
-gpadmin    10804   10782  0 12:19 ?        00:00:00 postgres:  6002, autovacuum launcher   
-gpadmin    10805   10782  0 12:19 ?        00:00:00 postgres:  6002, stats collector   
-gpadmin    10806   10782  0 12:19 ?        00:00:00 postgres:  6002, logical replication launcher   
-gpadmin    10809       1  0 12:19 ?        00:00:00 /usr/local/gpdb/bin/postgres -D /home/gpadmin/data/gpsne-1 -c gp_role=dispatch
-gpadmin    10810   10809  0 12:19 ?        00:00:00 postgres:  5432, master logger process   
-gpadmin    10812   10809  0 12:19 ?        00:00:00 postgres:  5432, checkpointer   
-gpadmin    10813   10809  0 12:19 ?        00:00:00 postgres:  5432, background writer   
-gpadmin    10814   10809  0 12:19 ?        00:00:00 postgres:  5432, walwriter   
-gpadmin    10815   10809  0 12:19 ?        00:00:00 postgres:  5432, autovacuum launcher   
-gpadmin    10816   10809  0 12:19 ?        00:00:00 postgres:  5432, stats collector   
-gpadmin    10817   10809  0 12:19 ?        00:00:00 postgres:  5432, dtx recovery process   
-gpadmin    10818   10809  0 12:19 ?        00:00:00 postgres:  5432, ftsprobe process   
-gpadmin    10833   10809  0 12:19 ?        00:00:00 postgres:  5432, logical replication launcher
+<div class="highlight"><pre><span></span><code>gpadmin<span class="w">    </span><span class="m">10780</span><span class="w">       </span><span class="m">1</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>/usr/local/gpdb/bin/postgres<span class="w"> </span>-D<span class="w"> </span>/home/gpadmin/data/gpsne0<span class="w"> </span>-c<span class="w"> </span><span class="nv">gp_role</span><span class="o">=</span>execute
+gpadmin<span class="w">    </span><span class="m">10781</span><span class="w">       </span><span class="m">1</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>/usr/local/gpdb/bin/postgres<span class="w"> </span>-D<span class="w"> </span>/home/gpadmin/data/gpsne1<span class="w"> </span>-c<span class="w"> </span><span class="nv">gp_role</span><span class="o">=</span>execute
+gpadmin<span class="w">    </span><span class="m">10782</span><span class="w">       </span><span class="m">1</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>/usr/local/gpdb/bin/postgres<span class="w"> </span>-D<span class="w"> </span>/home/gpadmin/data/gpsne2<span class="w"> </span>-c<span class="w"> </span><span class="nv">gp_role</span><span class="o">=</span>execute
+gpadmin<span class="w">    </span><span class="m">10783</span><span class="w">   </span><span class="m">10780</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6000</span>,<span class="w"> </span>logger<span class="w"> </span>process<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10784</span><span class="w">   </span><span class="m">10781</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6001</span>,<span class="w"> </span>logger<span class="w"> </span>process<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10785</span><span class="w">   </span><span class="m">10782</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6002</span>,<span class="w"> </span>logger<span class="w"> </span>process<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10789</span><span class="w">   </span><span class="m">10780</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6000</span>,<span class="w"> </span>checkpointer<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10790</span><span class="w">   </span><span class="m">10780</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6000</span>,<span class="w"> </span>background<span class="w"> </span>writer<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10791</span><span class="w">   </span><span class="m">10780</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6000</span>,<span class="w"> </span>walwriter<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10792</span><span class="w">   </span><span class="m">10780</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6000</span>,<span class="w"> </span>autovacuum<span class="w"> </span>launcher<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10793</span><span class="w">   </span><span class="m">10780</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6000</span>,<span class="w"> </span>stats<span class="w"> </span>collector<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10794</span><span class="w">   </span><span class="m">10780</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6000</span>,<span class="w"> </span>logical<span class="w"> </span>replication<span class="w"> </span>launcher<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10795</span><span class="w">   </span><span class="m">10781</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6001</span>,<span class="w"> </span>checkpointer<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10796</span><span class="w">   </span><span class="m">10781</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6001</span>,<span class="w"> </span>background<span class="w"> </span>writer<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10797</span><span class="w">   </span><span class="m">10781</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6001</span>,<span class="w"> </span>walwriter<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10798</span><span class="w">   </span><span class="m">10781</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6001</span>,<span class="w"> </span>autovacuum<span class="w"> </span>launcher<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10799</span><span class="w">   </span><span class="m">10781</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6001</span>,<span class="w"> </span>stats<span class="w"> </span>collector<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10800</span><span class="w">   </span><span class="m">10781</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6001</span>,<span class="w"> </span>logical<span class="w"> </span>replication<span class="w"> </span>launcher<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10801</span><span class="w">   </span><span class="m">10782</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6002</span>,<span class="w"> </span>checkpointer<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10802</span><span class="w">   </span><span class="m">10782</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6002</span>,<span class="w"> </span>background<span class="w"> </span>writer<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10803</span><span class="w">   </span><span class="m">10782</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6002</span>,<span class="w"> </span>walwriter<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10804</span><span class="w">   </span><span class="m">10782</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6002</span>,<span class="w"> </span>autovacuum<span class="w"> </span>launcher<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10805</span><span class="w">   </span><span class="m">10782</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6002</span>,<span class="w"> </span>stats<span class="w"> </span>collector<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10806</span><span class="w">   </span><span class="m">10782</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">6002</span>,<span class="w"> </span>logical<span class="w"> </span>replication<span class="w"> </span>launcher<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10809</span><span class="w">       </span><span class="m">1</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>/usr/local/gpdb/bin/postgres<span class="w"> </span>-D<span class="w"> </span>/home/gpadmin/data/gpsne-1<span class="w"> </span>-c<span class="w"> </span><span class="nv">gp_role</span><span class="o">=</span>dispatch
+gpadmin<span class="w">    </span><span class="m">10810</span><span class="w">   </span><span class="m">10809</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">5432</span>,<span class="w"> </span>master<span class="w"> </span>logger<span class="w"> </span>process<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10812</span><span class="w">   </span><span class="m">10809</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">5432</span>,<span class="w"> </span>checkpointer<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10813</span><span class="w">   </span><span class="m">10809</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">5432</span>,<span class="w"> </span>background<span class="w"> </span>writer<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10814</span><span class="w">   </span><span class="m">10809</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">5432</span>,<span class="w"> </span>walwriter<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10815</span><span class="w">   </span><span class="m">10809</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">5432</span>,<span class="w"> </span>autovacuum<span class="w"> </span>launcher<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10816</span><span class="w">   </span><span class="m">10809</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">5432</span>,<span class="w"> </span>stats<span class="w"> </span>collector<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10817</span><span class="w">   </span><span class="m">10809</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">5432</span>,<span class="w"> </span>dtx<span class="w"> </span>recovery<span class="w"> </span>process<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10818</span><span class="w">   </span><span class="m">10809</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">5432</span>,<span class="w"> </span>ftsprobe<span class="w"> </span>process<span class="w">   </span>
+gpadmin<span class="w">    </span><span class="m">10833</span><span class="w">   </span><span class="m">10809</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">12</span>:19<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>postgres:<span class="w">  </span><span class="m">5432</span>,<span class="w"> </span>logical<span class="w"> </span>replication<span class="w"> </span>launcher
 </code></pre></div></p>
 <h3 id="after-cluster-creation-add-data-directory-to-environment">After cluster creation add data directory to environment.</h3>
-<ul>
-<li>As gpadmin, <code>echo "COORDINATOR_DATA_DIRECTORY=/home/gpadmin/data/gpsne-1" &gt;&gt; .bashrc</code></li>
-</ul>
+<p>As gpadmin, <code>echo "COORDINATOR_DATA_DIRECTORY=/home/gpadmin/data/gpsne-1" &gt;&gt; .bashrc</code></p>
 <h2 id="test-cluster">Test cluster</h2>
-<ul>
-<li>
 <p>As gpadmin, <code>createdb test</code></p>
-</li>
-<li>
 <p><code>psql test</code><br />
-<div class="highlight"><pre><span></span><code>psql (12.12)
-Type &quot;help&quot; for help.
+<div class="highlight"><pre><span></span><code><span class="n">psql</span><span class="w"> </span><span class="p">(</span><span class="mf">12.12</span><span class="p">)</span>
+<span class="k">Type</span><span class="w"> </span><span class="s s-Name">&quot;help&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">help</span><span class="mf">.</span>
 
-test=# \timing
-Timing is on.
+<span class="n">test</span><span class="o">=#</span><span class="w"> </span><span class="err">\</span><span class="n">timing</span>
+<span class="n">Timing</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">on</span><span class="mf">.</span>
 
-test=# create table t1 as select generate_series(1,1000000) as colA distributed by (colA);
-SELECT 1000000
-Time: 683.351 ms
+<span class="n">test</span><span class="o">=#</span><span class="w"> </span><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="n">t1</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="n">generate_series</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span><span class="mf">1000000</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">colA</span><span class="w"> </span><span class="n">distributed</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="p">(</span><span class="n">colA</span><span class="p">);</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="mf">1000000</span>
+<span class="nb">Time</span><span class="p">:</span><span class="w"> </span><span class="mf">683.351</span><span class="w"> </span><span class="n">ms</span>
 
-test=# select count(*) from t1;
-  count  
----------
- 1000000
-(1 row)
-Time: 164.377 ms
+<span class="n">test</span><span class="o">=#</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="n">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">t1</span><span class="p">;</span>
+<span class="w">  </span><span class="n">count</span><span class="w">  </span>
+<span class="c1">---------</span>
+<span class="w"> </span><span class="mf">1000000</span>
+<span class="p">(</span><span class="mf">1</span><span class="w"> </span><span class="k">row</span><span class="p">)</span>
+<span class="nb">Time</span><span class="p">:</span><span class="w"> </span><span class="mf">164.377</span><span class="w"> </span><span class="n">ms</span>
 
-test=# select sum(colA) from t1;
-     sum      
---------------
- 500000500000
-(1 row)
-Time: 89.030 ms
+<span class="n">test</span><span class="o">=#</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="n">sum</span><span class="p">(</span><span class="n">colA</span><span class="p">)</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">t1</span><span class="p">;</span>
+<span class="w">     </span><span class="n">sum</span><span class="w">      </span>
+<span class="c1">--------------</span>
+<span class="w"> </span><span class="mf">500000500000</span>
+<span class="p">(</span><span class="mf">1</span><span class="w"> </span><span class="k">row</span><span class="p">)</span>
+<span class="nb">Time</span><span class="p">:</span><span class="w"> </span><span class="mf">89.030</span><span class="w"> </span><span class="n">ms</span>
 </code></pre></div></p>
-</li>
-</ul>
 <h3 id="epas-17">EPAS 17</h3>
-<div class="highlight"><pre><span></span><code>[enterprisedb@onion ~]$ psql edb
-psql (17.2.0)
-Type &quot;help&quot; for help.
+<div class="highlight"><pre><span></span><code><span class="p">[</span><span class="n">enterprisedb</span><span class="o">@</span><span class="n">onion</span><span class="w"> </span><span class="o">~</span><span class="p">]</span><span class="err">$</span><span class="w"> </span><span class="n">psql</span><span class="w"> </span><span class="n">edb</span>
+<span class="n">psql</span><span class="w"> </span><span class="p">(</span><span class="mf">17.2.0</span><span class="p">)</span>
+<span class="k">Type</span><span class="w"> </span><span class="s s-Name">&quot;help&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">help</span><span class="mf">.</span>
 
-edb=# \timing
-Timing is on.
+<span class="n">edb</span><span class="o">=#</span><span class="w"> </span><span class="err">\</span><span class="n">timing</span>
+<span class="n">Timing</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">on</span><span class="mf">.</span>
 
-edb=# create table t1 as select generate_series(1,1000000);
-SELECT 1000000
-Time: 1483.358 ms (00:01.483)
+<span class="n">edb</span><span class="o">=#</span><span class="w"> </span><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="n">t1</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="n">generate_series</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span><span class="mf">1000000</span><span class="p">);</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="mf">1000000</span>
+<span class="nb">Time</span><span class="p">:</span><span class="w"> </span><span class="mf">1483.358</span><span class="w"> </span><span class="n">ms</span><span class="w"> </span><span class="p">(</span><span class="mf">00</span><span class="p">:</span><span class="mf">01.483</span><span class="p">)</span>
 
-edb=# select count(*) from t1;
-  count  
----------
- 1000000
-(1 row)
-Time: 67.455 ms
+<span class="n">edb</span><span class="o">=#</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="n">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">t1</span><span class="p">;</span>
+<span class="w">  </span><span class="n">count</span><span class="w">  </span>
+<span class="c1">---------</span>
+<span class="w"> </span><span class="mf">1000000</span>
+<span class="p">(</span><span class="mf">1</span><span class="w"> </span><span class="k">row</span><span class="p">)</span>
+<span class="nb">Time</span><span class="p">:</span><span class="w"> </span><span class="mf">67.455</span><span class="w"> </span><span class="n">ms</span>
 
-edb=# select sum(generate_series) from t1;
-     sum      
---------------
- 500000500000
-(1 row)
-Time: 61.911 ms
+<span class="n">edb</span><span class="o">=#</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="n">sum</span><span class="p">(</span><span class="n">generate_series</span><span class="p">)</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">t1</span><span class="p">;</span>
+<span class="w">     </span><span class="n">sum</span><span class="w">      </span>
+<span class="c1">--------------</span>
+<span class="w"> </span><span class="mf">500000500000</span>
+<span class="p">(</span><span class="mf">1</span><span class="w"> </span><span class="k">row</span><span class="p">)</span>
+<span class="nb">Time</span><span class="p">:</span><span class="w"> </span><span class="mf">61.911</span><span class="w"> </span><span class="n">ms</span>
 </code></pre></div>
 <h2 id="remove-the-system">Remove the system</h2>
 <p>Normally you should be able to remove the system using <code>gpdeletesystem</code>. If you get the error <code>gpadmin-[CRITICAL]:-Error deleting system: FATAL:  System was started in single node mode - only utility mode connections are allowed</code>, then just stop the cluster using <code>gpstop</code> and remove the directoes and files under the <code>./data</code> directory. There must be a better way, but i haven't figured that out yet.</p>
@@ -1027,146 +975,149 @@ Time: 61.911 ms
 <p>The intent is to be able to query the many CSV files i have on a CIFS volume using a foreign data wrapper.</p>
 <h2 id="mount-the-smb-share-on-the-server">Mount the SMB share on the server</h2>
 <h3 id="install-samba-if-not-already-installed">Install Samba if not already installed</h3>
-<div class="highlight"><pre><span></span><code>[ton@onion ~]$ sudo dnf install cifs-utils samba samba-common samba-client
-Last metadata expiration check: 2:52:41 ago on Thu 02 Jan 2025 10:06:42 AM CET.
-Package cifs-utils-7.0-5.el9.x86_64 is already installed.
-Package samba-common-4.20.2-2.el9_5.noarch is already installed.
-Package samba-client-4.20.2-2.el9_5.x86_64 is already installed.
-Dependencies resolved.
-=============================================================================================================
- Package                            Architecture       Version                      Repository          Size
-=============================================================================================================
+<div class="highlight"><pre><span></span><code><span class="o">[</span>ton@onion<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>cifs-utils<span class="w"> </span>samba<span class="w"> </span>samba-common<span class="w"> </span>samba-client
+Last<span class="w"> </span>metadata<span class="w"> </span>expiration<span class="w"> </span>check:<span class="w"> </span><span class="m">2</span>:52:41<span class="w"> </span>ago<span class="w"> </span>on<span class="w"> </span>Thu<span class="w"> </span><span class="m">02</span><span class="w"> </span>Jan<span class="w"> </span><span class="m">2025</span><span class="w"> </span><span class="m">10</span>:06:42<span class="w"> </span>AM<span class="w"> </span>CET.
+Package<span class="w"> </span>cifs-utils-7.0-5.el9.x86_64<span class="w"> </span>is<span class="w"> </span>already<span class="w"> </span>installed.
+Package<span class="w"> </span>samba-common-4.20.2-2.el9_5.noarch<span class="w"> </span>is<span class="w"> </span>already<span class="w"> </span>installed.
+Package<span class="w"> </span>samba-client-4.20.2-2.el9_5.x86_64<span class="w"> </span>is<span class="w"> </span>already<span class="w"> </span>installed.
+Dependencies<span class="w"> </span>resolved.
+<span class="o">=============================================================================================================</span>
+<span class="w"> </span>Package<span class="w">                            </span>Architecture<span class="w">       </span>Version<span class="w">                      </span>Repository<span class="w">          </span><span class="nv">Size</span>
+<span class="o">=============================================================================================================</span>
 Installing:
- samba                              x86_64             4.20.2-2.el9_5               baseos             939 k
-Installing dependencies:
- libnetapi                          x86_64             4.20.2-2.el9_5               baseos             143 k
- samba-common-tools                 x86_64             4.20.2-2.el9_5               baseos             483 k
- samba-dcerpc                       x86_64             4.20.2-2.el9_5               baseos             716 k
- samba-ldb-ldap-modules             x86_64             4.20.2-2.el9_5               baseos              27 k
- samba-libs                         x86_64             4.20.2-2.el9_5               baseos             124 k
+<span class="w"> </span>samba<span class="w">                              </span>x86_64<span class="w">             </span><span class="m">4</span>.20.2-2.el9_5<span class="w">               </span>baseos<span class="w">             </span><span class="m">939</span><span class="w"> </span>k
+Installing<span class="w"> </span>dependencies:
+<span class="w"> </span>libnetapi<span class="w">                          </span>x86_64<span class="w">             </span><span class="m">4</span>.20.2-2.el9_5<span class="w">               </span>baseos<span class="w">             </span><span class="m">143</span><span class="w"> </span>k
+<span class="w"> </span>samba-common-tools<span class="w">                 </span>x86_64<span class="w">             </span><span class="m">4</span>.20.2-2.el9_5<span class="w">               </span>baseos<span class="w">             </span><span class="m">483</span><span class="w"> </span>k
+<span class="w"> </span>samba-dcerpc<span class="w">                       </span>x86_64<span class="w">             </span><span class="m">4</span>.20.2-2.el9_5<span class="w">               </span>baseos<span class="w">             </span><span class="m">716</span><span class="w"> </span>k
+<span class="w"> </span>samba-ldb-ldap-modules<span class="w">             </span>x86_64<span class="w">             </span><span class="m">4</span>.20.2-2.el9_5<span class="w">               </span>baseos<span class="w">              </span><span class="m">27</span><span class="w"> </span>k
+<span class="w"> </span>samba-libs<span class="w">                         </span>x86_64<span class="w">             </span><span class="m">4</span>.20.2-2.el9_5<span class="w">               </span>baseos<span class="w">             </span><span class="m">124</span><span class="w"> </span>k
 
-Transaction Summary
-=============================================================================================================
-Install  6 Packages
+Transaction<span class="w"> </span><span class="nv">Summary</span>
+<span class="o">=============================================================================================================</span>
+Install<span class="w">  </span><span class="m">6</span><span class="w"> </span>Packages
 
-Total download size: 2.4 M
-Installed size: 8.6 M
-Is this ok [y/N]: y
-Downloading Packages:
-(1/6): samba-libs-4.20.2-2.el9_5.x86_64.rpm                                  353 kB/s | 124 kB     00:00    
-(2/6): samba-ldb-ldap-modules-4.20.2-2.el9_5.x86_64.rpm                      414 kB/s |  27 kB     00:00    
-(3/6): samba-common-tools-4.20.2-2.el9_5.x86_64.rpm                          979 kB/s | 483 kB     00:00    
-(4/6): samba-4.20.2-2.el9_5.x86_64.rpm                                       1.7 MB/s | 939 kB     00:00    
-(5/6): samba-dcerpc-4.20.2-2.el9_5.x86_64.rpm                                2.5 MB/s | 716 kB     00:00    
-(6/6): libnetapi-4.20.2-2.el9_5.x86_64.rpm                                   358 kB/s | 143 kB     00:00    
+Total<span class="w"> </span>download<span class="w"> </span>size:<span class="w"> </span><span class="m">2</span>.4<span class="w"> </span>M
+Installed<span class="w"> </span>size:<span class="w"> </span><span class="m">8</span>.6<span class="w"> </span>M
+Is<span class="w"> </span>this<span class="w"> </span>ok<span class="w"> </span><span class="o">[</span>y/N<span class="o">]</span>:<span class="w"> </span>y
+Downloading<span class="w"> </span>Packages:
+<span class="o">(</span><span class="m">1</span>/6<span class="o">)</span>:<span class="w"> </span>samba-libs-4.20.2-2.el9_5.x86_64.rpm<span class="w">                                  </span><span class="m">353</span><span class="w"> </span>kB/s<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="m">124</span><span class="w"> </span>kB<span class="w">     </span><span class="m">00</span>:00<span class="w">    </span>
+<span class="o">(</span><span class="m">2</span>/6<span class="o">)</span>:<span class="w"> </span>samba-ldb-ldap-modules-4.20.2-2.el9_5.x86_64.rpm<span class="w">                      </span><span class="m">414</span><span class="w"> </span>kB/s<span class="w"> </span><span class="p">|</span><span class="w">  </span><span class="m">27</span><span class="w"> </span>kB<span class="w">     </span><span class="m">00</span>:00<span class="w">    </span>
+<span class="o">(</span><span class="m">3</span>/6<span class="o">)</span>:<span class="w"> </span>samba-common-tools-4.20.2-2.el9_5.x86_64.rpm<span class="w">                          </span><span class="m">979</span><span class="w"> </span>kB/s<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="m">483</span><span class="w"> </span>kB<span class="w">     </span><span class="m">00</span>:00<span class="w">    </span>
+<span class="o">(</span><span class="m">4</span>/6<span class="o">)</span>:<span class="w"> </span>samba-4.20.2-2.el9_5.x86_64.rpm<span class="w">                                       </span><span class="m">1</span>.7<span class="w"> </span>MB/s<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="m">939</span><span class="w"> </span>kB<span class="w">     </span><span class="m">00</span>:00<span class="w">    </span>
+<span class="o">(</span><span class="m">5</span>/6<span class="o">)</span>:<span class="w"> </span>samba-dcerpc-4.20.2-2.el9_5.x86_64.rpm<span class="w">                                </span><span class="m">2</span>.5<span class="w"> </span>MB/s<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="m">716</span><span class="w"> </span>kB<span class="w">     </span><span class="m">00</span>:00<span class="w">    </span>
+<span class="o">(</span><span class="m">6</span>/6<span class="o">)</span>:<span class="w"> </span>libnetapi-4.20.2-2.el9_5.x86_64.rpm<span class="w">                                   </span><span class="m">358</span><span class="w"> </span>kB/s<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="m">143</span><span class="w"> </span>kB<span class="w">     </span><span class="m">00</span>:00<span class="w">    </span>
 -------------------------------------------------------------------------------------------------------------
-Total                                                                        2.1 MB/s | 2.4 MB     00:01     
-Running transaction check
-Transaction check succeeded.
-Running transaction test
-Transaction test succeeded.
-Running transaction
-  Preparing        :                                                                                     1/1 
-  Installing       : libnetapi-4.20.2-2.el9_5.x86_64                                                     1/6 
-  Installing       : samba-libs-4.20.2-2.el9_5.x86_64                                                    2/6 
-  Installing       : samba-dcerpc-4.20.2-2.el9_5.x86_64                                                  3/6 
-  Installing       : samba-ldb-ldap-modules-4.20.2-2.el9_5.x86_64                                        4/6 
-  Installing       : samba-common-tools-4.20.2-2.el9_5.x86_64                                            5/6 
-  Installing       : samba-4.20.2-2.el9_5.x86_64                                                         6/6 
-  Running scriptlet: samba-4.20.2-2.el9_5.x86_64                                                         6/6 
-  Verifying        : samba-libs-4.20.2-2.el9_5.x86_64                                                    1/6 
-  Verifying        : samba-common-tools-4.20.2-2.el9_5.x86_64                                            2/6 
-  Verifying        : samba-4.20.2-2.el9_5.x86_64                                                         3/6 
-  Verifying        : samba-ldb-ldap-modules-4.20.2-2.el9_5.x86_64                                        4/6 
-  Verifying        : samba-dcerpc-4.20.2-2.el9_5.x86_64                                                  5/6 
-  Verifying        : libnetapi-4.20.2-2.el9_5.x86_64                                                     6/6 
+Total<span class="w">                                                                        </span><span class="m">2</span>.1<span class="w"> </span>MB/s<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="m">2</span>.4<span class="w"> </span>MB<span class="w">     </span><span class="m">00</span>:01<span class="w">     </span>
+Running<span class="w"> </span>transaction<span class="w"> </span>check
+Transaction<span class="w"> </span>check<span class="w"> </span>succeeded.
+Running<span class="w"> </span>transaction<span class="w"> </span><span class="nb">test</span>
+Transaction<span class="w"> </span><span class="nb">test</span><span class="w"> </span>succeeded.
+Running<span class="w"> </span>transaction
+<span class="w">  </span>Preparing<span class="w">        </span>:<span class="w">                                                                                     </span><span class="m">1</span>/1<span class="w"> </span>
+<span class="w">  </span>Installing<span class="w">       </span>:<span class="w"> </span>libnetapi-4.20.2-2.el9_5.x86_64<span class="w">                                                     </span><span class="m">1</span>/6<span class="w"> </span>
+<span class="w">  </span>Installing<span class="w">       </span>:<span class="w"> </span>samba-libs-4.20.2-2.el9_5.x86_64<span class="w">                                                    </span><span class="m">2</span>/6<span class="w"> </span>
+<span class="w">  </span>Installing<span class="w">       </span>:<span class="w"> </span>samba-dcerpc-4.20.2-2.el9_5.x86_64<span class="w">                                                  </span><span class="m">3</span>/6<span class="w"> </span>
+<span class="w">  </span>Installing<span class="w">       </span>:<span class="w"> </span>samba-ldb-ldap-modules-4.20.2-2.el9_5.x86_64<span class="w">                                        </span><span class="m">4</span>/6<span class="w"> </span>
+<span class="w">  </span>Installing<span class="w">       </span>:<span class="w"> </span>samba-common-tools-4.20.2-2.el9_5.x86_64<span class="w">                                            </span><span class="m">5</span>/6<span class="w"> </span>
+<span class="w">  </span>Installing<span class="w">       </span>:<span class="w"> </span>samba-4.20.2-2.el9_5.x86_64<span class="w">                                                         </span><span class="m">6</span>/6<span class="w"> </span>
+<span class="w">  </span>Running<span class="w"> </span>scriptlet:<span class="w"> </span>samba-4.20.2-2.el9_5.x86_64<span class="w">                                                         </span><span class="m">6</span>/6<span class="w"> </span>
+<span class="w">  </span>Verifying<span class="w">        </span>:<span class="w"> </span>samba-libs-4.20.2-2.el9_5.x86_64<span class="w">                                                    </span><span class="m">1</span>/6<span class="w"> </span>
+<span class="w">  </span>Verifying<span class="w">        </span>:<span class="w"> </span>samba-common-tools-4.20.2-2.el9_5.x86_64<span class="w">                                            </span><span class="m">2</span>/6<span class="w"> </span>
+<span class="w">  </span>Verifying<span class="w">        </span>:<span class="w"> </span>samba-4.20.2-2.el9_5.x86_64<span class="w">                                                         </span><span class="m">3</span>/6<span class="w"> </span>
+<span class="w">  </span>Verifying<span class="w">        </span>:<span class="w"> </span>samba-ldb-ldap-modules-4.20.2-2.el9_5.x86_64<span class="w">                                        </span><span class="m">4</span>/6<span class="w"> </span>
+<span class="w">  </span>Verifying<span class="w">        </span>:<span class="w"> </span>samba-dcerpc-4.20.2-2.el9_5.x86_64<span class="w">                                                  </span><span class="m">5</span>/6<span class="w"> </span>
+<span class="w">  </span>Verifying<span class="w">        </span>:<span class="w"> </span>libnetapi-4.20.2-2.el9_5.x86_64<span class="w">                                                     </span><span class="m">6</span>/6<span class="w"> </span>
 
 Installed:
-  libnetapi-4.20.2-2.el9_5.x86_64                            samba-4.20.2-2.el9_5.x86_64                     
-  samba-common-tools-4.20.2-2.el9_5.x86_64                   samba-dcerpc-4.20.2-2.el9_5.x86_64              
-  samba-ldb-ldap-modules-4.20.2-2.el9_5.x86_64               samba-libs-4.20.2-2.el9_5.x86_64                
+<span class="w">  </span>libnetapi-4.20.2-2.el9_5.x86_64<span class="w">                            </span>samba-4.20.2-2.el9_5.x86_64<span class="w">                     </span>
+<span class="w">  </span>samba-common-tools-4.20.2-2.el9_5.x86_64<span class="w">                   </span>samba-dcerpc-4.20.2-2.el9_5.x86_64<span class="w">              </span>
+<span class="w">  </span>samba-ldb-ldap-modules-4.20.2-2.el9_5.x86_64<span class="w">               </span>samba-libs-4.20.2-2.el9_5.x86_64<span class="w">                </span>
 
 Complete!
 </code></pre></div>
 <h3 id="create-directory-where-to-mount-the-smb-share">Create directory where to mount the SMB share.</h3>
-<div class="highlight"><pre><span></span><code>[ton@onion ~]$ mkdir /mnt/usbdrive
+<div class="highlight"><pre><span></span><code><span class="o">[</span>ton@onion<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>mkdir<span class="w"> </span>/mnt/usbdrive
 </code></pre></div>
 <h3 id="create-a-samba-credentials-file">Create a Samba credentials file.</h3>
-<div class="highlight"><pre><span></span><code>[ton@onion ~]$ sudo cat - &gt; /root/.smbcredentials_USB
-username=ton
-password=&lt;password&gt;
+<div class="highlight"><pre><span></span><code><span class="o">[</span>ton@onion<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>sudo<span class="w"> </span>cat<span class="w"> </span>-<span class="w"> </span>&gt;<span class="w"> </span>/root/.smbcredentials_USB
+<span class="nv">username</span><span class="o">=</span>ton
+<span class="nv">password</span><span class="o">=</span>&lt;password&gt;
 ^Z
-[ton@onion ~]$ chmod 600 /root/.smbcredentials_USB
+<span class="o">[</span>ton@onion<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/root/.smbcredentials_USB
 </code></pre></div>
 <h3 id="test-mount-the-share-the-add-it-to-etcfstab">Test mount the share, the add it to <code>/etc/fstab</code>.</h3>
-<div class="highlight"><pre><span></span><code>[ton@onion ~]$ sudo mount -t cifs //192.168.0.10/USB /mnt/usbdrive -o credentials=/root/.smbcredentials_USB
-[ton@onion ~]$ cd /mnt/usbdrive/
-[ton@onion usbdrive]$ ls
- Breaches        iPhone          Ringtones         Videos
-&#39;Curious Moon&#39;   ISOs            ROMS              Webs
- Downloads      &#39;Motos Coches&#39;   Shared            Work
- Drivers         Personal        Software         &#39;xBox 360&#39;
- eBooks          Photos         &#39;Surabhi Pandey&#39;
- Hacking         Radio           UFO
+<div class="highlight"><pre><span></span><code><span class="o">[</span>ton@onion<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>sudo<span class="w"> </span>mount<span class="w"> </span>-t<span class="w"> </span>cifs<span class="w"> </span>//192.168.0.10/USB<span class="w"> </span>/mnt/usbdrive<span class="w"> </span>-o<span class="w"> </span><span class="nv">credentials</span><span class="o">=</span>/root/.smbcredentials_USB
+<span class="o">[</span>ton@onion<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/mnt/usbdrive/
+<span class="o">[</span>ton@onion<span class="w"> </span>usbdrive<span class="o">]</span>$<span class="w"> </span>ls
+<span class="w"> </span>Breaches<span class="w">        </span>iPhone<span class="w">          </span>Ringtones<span class="w">         </span>Videos
+<span class="s1">&#39;Curious Moon&#39;</span><span class="w">   </span>ISOs<span class="w">            </span>ROMS<span class="w">              </span>Webs
+<span class="w"> </span>Downloads<span class="w">      </span><span class="s1">&#39;Motos Coches&#39;</span><span class="w">   </span>Shared<span class="w">            </span>Work
+<span class="w"> </span>Drivers<span class="w">         </span>Personal<span class="w">        </span>Software<span class="w">         </span><span class="s1">&#39;xBox 360&#39;</span>
+<span class="w"> </span>eBooks<span class="w">          </span>Photos<span class="w">         </span><span class="s1">&#39;Surabhi Pandey&#39;</span>
+<span class="w"> </span>Hacking<span class="w">         </span>Radio<span class="w">           </span>UFO
 
-[ton@onion ~]$ umount /mnt/usbdrive
-[ton@onion ~]$ echo &quot;//192.168.0.10/USB /mnt/usbdrive cifs ro,auto,credentials=/root/.smbcredentials_USB 0 0&quot; &gt;&gt; /etc/fstab
-[ton@onion ~]$ sudo systemctl daemon-reload
-[ton@onion ~]$ sudo mount -a -v
-/                        : ignored
-/boot                    : already mounted
-/boot/efi                : already mounted
-/home                    : already mounted
-none                     : ignored
-Host &quot;192.168.0.10&quot; resolved to the following IP addresses: 192.168.0.10
-mount.cifs kernel mount options: ip=192.168.0.10,unc=\\192.168.0.10\USB,user=ton,pass=********
-/mnt/usbdrive            : successfully mounted
-[ton@onion ~]$ ls /mnt/usbdrive
- Breaches        Downloads   eBooks    iPhone  &#39;Motos Coches&#39;   Photos   Ringtones   Shared    &#39;Surabhi Pandey&#39;   Videos   Work
-&#39;Curious Moon&#39;   Drivers     Hacking   ISOs     Personal        Radio    ROMS        Software   UFO               Webs    &#39;xBox 360&#39;
+<span class="o">[</span>ton@onion<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>umount<span class="w"> </span>/mnt/usbdrive
+<span class="o">[</span>ton@onion<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;//192.168.0.10/USB /mnt/usbdrive cifs ro,auto,credentials=/root/.smbcredentials_USB 0 0&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>/etc/fstab
+<span class="o">[</span>ton@onion<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+<span class="o">[</span>ton@onion<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>sudo<span class="w"> </span>mount<span class="w"> </span>-a<span class="w"> </span>-v
+/<span class="w">                        </span>:<span class="w"> </span>ignored
+/boot<span class="w">                    </span>:<span class="w"> </span>already<span class="w"> </span>mounted
+/boot/efi<span class="w">                </span>:<span class="w"> </span>already<span class="w"> </span>mounted
+/home<span class="w">                    </span>:<span class="w"> </span>already<span class="w"> </span>mounted
+none<span class="w">                     </span>:<span class="w"> </span>ignored
+Host<span class="w"> </span><span class="s2">&quot;192.168.0.10&quot;</span><span class="w"> </span>resolved<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>following<span class="w"> </span>IP<span class="w"> </span>addresses:<span class="w"> </span><span class="m">192</span>.168.0.10
+mount.cifs<span class="w"> </span>kernel<span class="w"> </span>mount<span class="w"> </span>options:<span class="w"> </span><span class="nv">ip</span><span class="o">=</span><span class="m">192</span>.168.0.10,unc<span class="o">=</span><span class="se">\\</span><span class="m">192</span>.168.0.10<span class="se">\U</span>SB,user<span class="o">=</span>ton,pass<span class="o">=</span>********
+/mnt/usbdrive<span class="w">            </span>:<span class="w"> </span>successfully<span class="w"> </span>mounted
+<span class="o">[</span>ton@onion<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>ls<span class="w"> </span>/mnt/usbdrive
+<span class="w"> </span>Breaches<span class="w">        </span>Downloads<span class="w">   </span>eBooks<span class="w">    </span>iPhone<span class="w">  </span><span class="s1">&#39;Motos Coches&#39;</span><span class="w">   </span>Photos<span class="w">   </span>Ringtones<span class="w">   </span>Shared<span class="w">    </span><span class="s1">&#39;Surabhi Pandey&#39;</span><span class="w">   </span>Videos<span class="w">   </span>Work
+<span class="s1">&#39;Curious Moon&#39;</span><span class="w">   </span>Drivers<span class="w">     </span>Hacking<span class="w">   </span>ISOs<span class="w">     </span>Personal<span class="w">        </span>Radio<span class="w">    </span>ROMS<span class="w">        </span>Software<span class="w">   </span>UFO<span class="w">               </span>Webs<span class="w">    </span><span class="s1">&#39;xBox 360&#39;</span>
 </code></pre></div>
 <h2 id="not-that-the-server-is-prepared-lets-configure-the-database">Not that the server is prepared, let's configure the database.</h2>
 <h3 id="create-the-file_fdw-extension">Create the <code>file_fdw</code> extension.</h3>
-<div class="highlight"><pre><span></span><code>✗ ~ psql -h onion -p 5432 -U gpadmin breaches
-psql (17.2 (Homebrew), server 12.12)
-Type &quot;help&quot; for help.
+<div class="highlight"><pre><span></span><code><span class="err">✗</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">psql</span><span class="w"> </span><span class="o">-</span><span class="n">h</span><span class="w"> </span><span class="n">onion</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="mf">5432</span><span class="w"> </span><span class="o">-</span><span class="n">U</span><span class="w"> </span><span class="n">gpadmin</span><span class="w"> </span><span class="n">breaches</span>
+<span class="n">psql</span><span class="w"> </span><span class="p">(</span><span class="mf">17.2</span><span class="w"> </span><span class="p">(</span><span class="n">Homebrew</span><span class="p">),</span><span class="w"> </span><span class="k">server</span><span class="w"> </span><span class="mf">12.12</span><span class="p">)</span>
+<span class="k">Type</span><span class="w"> </span><span class="s s-Name">&quot;help&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">help</span><span class="mf">.</span>
 
-breaches=# \dx
-                                List of installed extensions
-      Name       | Version |   Schema   |                    Description                    
------------------+---------+------------+---------------------------------------------------
- gp_exttable_fdw | 1.0     | pg_catalog | External Table Foreign Data Wrapper for Greenplum
- gp_toolkit      | 1.6     | gp_toolkit | various GPDB administrative views/functions
- plpgsql         | 1.0     | pg_catalog | PL/pgSQL procedural language
-(3 rows)
+<span class="n">breaches</span><span class="o">=#</span><span class="w"> </span><span class="err">\</span><span class="n">dx</span>
+<span class="w">                                </span><span class="n">List</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">installed</span><span class="w"> </span><span class="n">extensions</span>
+<span class="w">      </span><span class="k">Name</span><span class="w">       </span><span class="o">|</span><span class="w"> </span><span class="k">Version</span><span class="w"> </span><span class="o">|</span><span class="w">   </span><span class="k">Schema</span><span class="w">   </span><span class="o">|</span><span class="w">                    </span><span class="n">Description</span><span class="w">                    </span>
+<span class="c1">-----------------+---------+------------+---------------------------------------------------</span>
+<span class="w"> </span><span class="n">gp_exttable_fdw</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="mf">1.0</span><span class="w">     </span><span class="o">|</span><span class="w"> </span><span class="n">pg_catalog</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="k">External</span><span class="w"> </span><span class="k">Table</span><span class="w"> </span><span class="k">Foreign</span><span class="w"> </span><span class="k">Data</span><span class="w"> </span><span class="k">Wrapper</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Greenplum</span>
+<span class="w"> </span><span class="n">gp_toolkit</span><span class="w">      </span><span class="o">|</span><span class="w"> </span><span class="mf">1.6</span><span class="w">     </span><span class="o">|</span><span class="w"> </span><span class="n">gp_toolkit</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">various</span><span class="w"> </span><span class="n">GPDB</span><span class="w"> </span><span class="n">administrative</span><span class="w"> </span><span class="k">views</span><span class="o">/</span><span class="k">functions</span>
+<span class="w"> </span><span class="n">plpgsql</span><span class="w">         </span><span class="o">|</span><span class="w"> </span><span class="mf">1.0</span><span class="w">     </span><span class="o">|</span><span class="w"> </span><span class="n">pg_catalog</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PL</span><span class="o">/</span><span class="n">pgSQL</span><span class="w"> </span><span class="k">procedural</span><span class="w"> </span><span class="k">language</span>
+<span class="p">(</span><span class="mf">3</span><span class="w"> </span><span class="k">rows</span><span class="p">)</span>
 
-breaches=# create extension file_fdw;
-CREATE EXTENSION
+<span class="n">breaches</span><span class="o">=#</span><span class="w"> </span><span class="k">create</span><span class="w"> </span><span class="k">extension</span><span class="w"> </span><span class="n">file_fdw</span><span class="p">;</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">EXTENSION</span>
 
-breaches=# \dx
-                                List of installed extensions
-      Name       | Version |   Schema   |                    Description                    
------------------+---------+------------+---------------------------------------------------
- file_fdw        | 1.0     | public     | foreign-data wrapper for flat file access
- gp_exttable_fdw | 1.0     | pg_catalog | External Table Foreign Data Wrapper for Greenplum
- gp_toolkit      | 1.6     | gp_toolkit | various GPDB administrative views/functions
- plpgsql         | 1.0     | pg_catalog | PL/pgSQL procedural language
-(4 rows)
+<span class="n">breaches</span><span class="o">=#</span><span class="w"> </span><span class="err">\</span><span class="n">dx</span>
+<span class="w">                                </span><span class="n">List</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">installed</span><span class="w"> </span><span class="n">extensions</span>
+<span class="w">      </span><span class="k">Name</span><span class="w">       </span><span class="o">|</span><span class="w"> </span><span class="k">Version</span><span class="w"> </span><span class="o">|</span><span class="w">   </span><span class="k">Schema</span><span class="w">   </span><span class="o">|</span><span class="w">                    </span><span class="n">Description</span><span class="w">                    </span>
+<span class="c1">-----------------+---------+------------+---------------------------------------------------</span>
+<span class="w"> </span><span class="n">file_fdw</span><span class="w">        </span><span class="o">|</span><span class="w"> </span><span class="mf">1.0</span><span class="w">     </span><span class="o">|</span><span class="w"> </span><span class="n">public</span><span class="w">     </span><span class="o">|</span><span class="w"> </span><span class="k">foreign</span><span class="o">-</span><span class="k">data</span><span class="w"> </span><span class="k">wrapper</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">flat</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="k">access</span>
+<span class="w"> </span><span class="n">gp_exttable_fdw</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="mf">1.0</span><span class="w">     </span><span class="o">|</span><span class="w"> </span><span class="n">pg_catalog</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="k">External</span><span class="w"> </span><span class="k">Table</span><span class="w"> </span><span class="k">Foreign</span><span class="w"> </span><span class="k">Data</span><span class="w"> </span><span class="k">Wrapper</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Greenplum</span>
+<span class="w"> </span><span class="n">gp_toolkit</span><span class="w">      </span><span class="o">|</span><span class="w"> </span><span class="mf">1.6</span><span class="w">     </span><span class="o">|</span><span class="w"> </span><span class="n">gp_toolkit</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">various</span><span class="w"> </span><span class="n">GPDB</span><span class="w"> </span><span class="n">administrative</span><span class="w"> </span><span class="k">views</span><span class="o">/</span><span class="k">functions</span>
+<span class="w"> </span><span class="n">plpgsql</span><span class="w">         </span><span class="o">|</span><span class="w"> </span><span class="mf">1.0</span><span class="w">     </span><span class="o">|</span><span class="w"> </span><span class="n">pg_catalog</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">PL</span><span class="o">/</span><span class="n">pgSQL</span><span class="w"> </span><span class="k">procedural</span><span class="w"> </span><span class="k">language</span>
+<span class="p">(</span><span class="mf">4</span><span class="w"> </span><span class="k">rows</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="create-the-server-and-the-table-definition">Create the server and the table definition.</h3>
-<div class="highlight"><pre><span></span><code>breaches=# CREATE SERVER csv_server FOREIGN DATA WRAPPER file_fdw;
-CREATE SERVER
-breaches=# CREATE FOREIGN TABLE accounts (email TEXT, password TEXT) SERVER csv_server OPTIONS (filename &#39;/mnt/usbdrive/Breaches/120k.txt&#39;,delimiter &#39;:&#39;,null &#39;NULL&#39;, header &#39;false&#39;);
-CREATE FOREIGN TABLE
-breaches=# select * from accounts;
-                       email                        |                              password                              
-----------------------------------------------------+--------------------------------------------------------------------
- 00_gerard00_@yahoo.com.ph                          | 001gerard
- 01010101@meralco.com.ph                            | nghao
- 012089_neil@yahoo.com.ph                           | music6
- 015_jericho@yahoo.com.ph                           | jericho
+<div class="highlight"><pre><span></span><code><span class="n">breaches</span><span class="o">=#</span><span class="w"> </span><span class="k">CREATE</span><span class="w"> </span><span class="k">SERVER</span><span class="w"> </span><span class="n">csv_server</span><span class="w"> </span><span class="k">FOREIGN</span><span class="w"> </span><span class="k">DATA</span><span class="w"> </span><span class="k">WRAPPER</span><span class="w"> </span><span class="n">file_fdw</span><span class="p">;</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">SERVER</span>
+<span class="n">breaches</span><span class="o">=#</span><span class="w"> </span><span class="k">CREATE</span><span class="w"> </span><span class="k">FOREIGN</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">accounts</span><span class="w"> </span><span class="p">(</span><span class="n">email</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span><span class="w"> </span><span class="k">password</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">)</span><span class="w"> </span><span class="k">SERVER</span><span class="w"> </span><span class="n">csv_server</span><span class="w"> </span><span class="k">OPTIONS</span><span class="w"> </span><span class="p">(</span><span class="n">filename</span><span class="w"> </span><span class="s1">&#39;/mnt/usbdrive/Breaches/120k.txt&#39;</span><span class="p">,</span><span class="k">delimiter</span><span class="w"> </span><span class="s1">&#39;:&#39;</span><span class="p">,</span><span class="k">null</span><span class="w"> </span><span class="s1">&#39;NULL&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">header</span><span class="w"> </span><span class="s1">&#39;false&#39;</span><span class="p">);</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">FOREIGN</span><span class="w"> </span><span class="k">TABLE</span>
+<span class="n">breaches</span><span class="o">=#</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">accounts</span><span class="p">;</span>
+<span class="w">                       </span><span class="n">email</span><span class="w">                        </span><span class="o">|</span><span class="w">                              </span><span class="k">password</span><span class="w">                              </span>
+<span class="c1">----------------------------------------------------+--------------------------------------------------------------------</span>
+<span class="w"> </span><span class="mf">00</span><span class="n">_gerard00_</span><span class="o">@</span><span class="n">yahoo</span><span class="mf">.</span><span class="n">com</span><span class="mf">.</span><span class="n">ph</span><span class="w">                          </span><span class="o">|</span><span class="w"> </span><span class="mf">001</span><span class="n">gerard</span>
+<span class="w"> </span><span class="mf">01010101</span><span class="o">@</span><span class="n">meralco</span><span class="mf">.</span><span class="n">com</span><span class="mf">.</span><span class="n">ph</span><span class="w">                            </span><span class="o">|</span><span class="w"> </span><span class="n">nghao</span>
+<span class="w"> </span><span class="mf">012089</span><span class="n">_neil</span><span class="o">@</span><span class="n">yahoo</span><span class="mf">.</span><span class="n">com</span><span class="mf">.</span><span class="n">ph</span><span class="w">                           </span><span class="o">|</span><span class="w"> </span><span class="n">music6</span>
+<span class="w"> </span><span class="mf">015</span><span class="n">_jericho</span><span class="o">@</span><span class="n">yahoo</span><span class="mf">.</span><span class="n">com</span><span class="mf">.</span><span class="n">ph</span><span class="w">                           </span><span class="o">|</span><span class="w"> </span><span class="n">jericho</span>
 </code></pre></div>
-<h2 id="next-is-to-find-a-way-to-query-all-files-in-the-directory-structure">Next is to find a way to query ALL files in the directory structure.</h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Next is to find a way to query ALL files in the directory structure, however, i cannot get globbing to work with the pg_file extension.</p>
+</div>
 
 
 
