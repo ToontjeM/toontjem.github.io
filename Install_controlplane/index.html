@@ -340,66 +340,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Installation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#clone-the-repo" class="md-nav__link">
-    <span class="md-ellipsis">
-      Clone the repo.
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#create-your-kind-cluster" class="md-nav__link">
-    <span class="md-ellipsis">
-      Create your kind cluster
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-your-edb-20-token" class="md-nav__link">
-    <span class="md-ellipsis">
-      Get your EDB 2.0 token.
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#create-the-namespace-and-secrets" class="md-nav__link">
-    <span class="md-ellipsis">
-      Create the namespace and secrets.
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#run-the-bootstrap-using-helm" class="md-nav__link">
-    <span class="md-ellipsis">
-      Run the bootstrap using helm.
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#use-the-portal" class="md-nav__link">
-    <span class="md-ellipsis">
-      Use the portal.
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -639,21 +579,28 @@
 <p class="admonition-title">Tip</p>
 <p>TL;DR Just run the <code>00-provision.sh</code> script which does all the below and go take a ☕.</p>
 <p>Script looks like this:<br />
-<div class="highlight"><pre><span></span><code>#!/bin/bash
-
-make create-kind
-EDBTOKEN=(`cat $HOME/.edbtoken`)
-echo $EDBTOKEN | ./scripts/install-static-pull-secret.sh
-helm upgrade -n edbpgai-bootstrap \
---install -f deploy/charts/edbpgai-bootstrap/values-kind.yaml \
---set bootstrapImage=docker.enterprisedb.com/staging_pgai-platform/edbpgai-bootstrap/bootstrap-kind:v1.0.0-gm-appl \
---set remoteContainerRegistryURL=docker.enterprisedb.com/staging_pgai-platform \
---set internalContainerRegistryURL=docker.enterprisedb.com/staging_pgai-platform \
-bootstrap deploy/charts/edbpgai-bootstrap
-POD=$(kubectl get pods -n edbpgai-bootstrap -o custom-columns=&quot;:metadata.name&quot; | grep -v &quot;NAME&quot;)
-kubectl logs -n edbpgai-bootstrap $POD -f
-</code></pre></div></p>
+```</p>
+<h1 id="binbash">!/bin/bash</h1>
+<p>make create-kind<br />
+EDBTOKEN=(<code>cat $HOME/.edbtoken</code>)<br />
+echo $EDBTOKEN | ./scripts/install-static-pull-secret.sh<br />
+helm upgrade -n edbpgai-bootstrap \<br />
+  --install -f deploy/charts/edbpgai-bootstrap/values-kind.yaml \<br />
+  --set bootstrapImage=docker.enterprisedb.com/staging_pgai-platform/edbpgai-bootstrap/bootstrap-kind:v1.0.3-appl \<br />
+  --set remoteContainerRegistryURL=docker.enterprisedb.com/staging_pgai-platform \<br />
+  --set internalContainerRegistryURL=docker.enterprisedb.com/staging_pgai-platform \<br />
+  bootstrap deploy/charts/edbpgai-bootstrap</p>
+<p>while true; do<br />
+  POD_NAME=$(kubectl get pods -n edbpgai-bootstrap -o jsonpath="{.items[0].metadata.name}")<br />
+  STATUS=$(kubectl get pod $POD_NAME -n edbpgai-bootstrap -o jsonpath="{.status.phase}")<br />
+  if [ "$STATUS" == "Running" ]; then<br />
+    break<br />
+  fi<br />
+  sleep 1<br />
+done</p>
+<p>kubectl logs -n edbpgai-bootstrap $POD_NAME -f</p>
 </div>
+<p>```</p>
 <h3 id="clone-the-repo">Clone the repo.</h3>
 <p><code>git clone https://github.com/EnterpriseDB/edbpgai-boot</code></p>
 <p><code>cd edbpgai-boot</code></p>
@@ -696,10 +643,10 @@ Installation completed
   --set internalContainerRegistryURL=docker.enterprisedb.com/staging_pgai-platform \
   bootstrap deploy/charts/edbpgai-bootstrap
 </code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This will take 15-20 minutes to complete depending on your machine specs. You can follow the progess using <code>kubectl logs -n edbpgai-bootstrap edbpgai-bootstrap-job-v1.0.0-&lt;tab&gt; -f</code></p>
-</div>
+<blockquote>
+<p>[!NOTE]<br />
+This will take 15-20 minutes to complete depending on your machine specs. You can follow the progess using <code>kubectl logs -n edbpgai-bootstrap edbpgai-bootstrap-job-v1.0.0-&lt;tab&gt; -f</code></p>
+</blockquote>
 <div class="highlight"><pre><span></span><code>...
 
 12:32:20PM: create customresourcedefinition/filters.fluentbit.fluent.io (apiextensions.k8s.io/v1) cluster
